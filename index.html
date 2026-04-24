@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Business-Ideen Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #1E404E;
+      background-image: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(232,206,146,0.12) 0%, transparent 60%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      font-family: sans-serif;
+      color: #FFFFFF;
+    }
+
+    #app { width: 100%; max-width: 680px; }
+
+    /* ── TYPOGRAPHY ── */
+    .serif { font-family: 'Cormorant Garamond', serif; }
+    .gold  { color: #E8CE92; }
+    .white { color: #FFFFFF; }
+    .muted { color: rgba(255,255,255,0.55); }
+    .dim   { color: rgba(255,255,255,0.3); }
+
+    /* ── SCREENS ── */
+    .screen { display: none; }
+    .screen.active { display: block; animation: fadeIn 0.5s ease; }
+
+    @keyframes fadeIn  { from { opacity: 0; }                        to { opacity: 1; } }
+    @keyframes fadeUp  { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin    { to   { transform: rotate(360deg); } }
+
+    /* ── INTRO ── */
+    #screen-intro { text-align: center; }
+    .intro-label { font-family: 'Cormorant Garamond', serif; color: #E8CE92; font-size: 13px; letter-spacing: 0.2em; margin-bottom: 32px; display: block; }
+    .intro-h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(42px, 7vw, 68px); font-weight: 500; line-height: 1.1; margin-bottom: 24px; }
+    .intro-sub { font-size: 17px; line-height: 1.7; color: rgba(255,255,255,0.55); max-width: 480px; margin: 0 auto 48px; }
+    .icons-row { display: flex; justify-content: center; gap: 32px; margin-bottom: 56px; }
+    .icon-item { text-align: center; }
+    .icon-circle { width: 48px; height: 48px; border: 1px solid rgba(232,206,146,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; color: #E8CE92; font-size: 18px; }
+    .icon-label { color: rgba(255,255,255,0.35); font-size: 12px; letter-spacing: 0.05em; }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      background: linear-gradient(135deg, #E8CE92, #c9a95a);
+      color: #000000; border: none; border-radius: 60px;
+      padding: 18px 52px; font-size: 16px; font-weight: 600;
+      cursor: pointer; letter-spacing: 0.04em;
+      box-shadow: 0 8px 32px rgba(232,206,146,0.25);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(232,206,146,0.35); }
+    .btn-primary:disabled { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.2); cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .btn-secondary {
+      background: transparent; border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.55); border-radius: 40px;
+      padding: 12px 24px; cursor: pointer; font-size: 14px;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.25); color: #fff; }
+
+    .btn-ghost {
+      background: transparent; border: 1px solid rgba(232,206,146,0.3);
+      color: #E8CE92; border-radius: 40px;
+      padding: 12px 32px; cursor: pointer; font-size: 14px;
+      letter-spacing: 0.04em; transition: all 0.3s;
+    }
+    .btn-ghost:hover { background: rgba(232,206,146,0.08); }
+
+    /* ── PROGRESS ── */
+    .progress { display: flex; gap: 8px; margin-bottom: 48px; }
+    .progress-bar { flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.08); transition: background 0.4s ease; }
+    .progress-bar.done { background: linear-gradient(90deg, #E8CE92, #c9a95a); }
+
+    /* ── QUESTION ── */
+    .step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .step-number { font-family: 'Cormorant Garamond', serif; color: rgba(232,206,146,0.4); font-size: 48px; font-weight: 300; line-height: 1; }
+    .step-subtitle { color: #E8CE92; font-size: 11px; letter-spacing: 0.15em; margin-bottom: 2px; }
+    .step-title { font-family: 'Cormorant Garamond', serif; color: #FFFFFF; font-size: 28px; font-weight: 600; }
+    .step-question { color: rgba(255,255,255,0.55); font-size: 16px; line-height: 1.7; margin: 20px 0 28px; }
+
+    textarea {
+      width: 100%; background: rgba(30,64,78,0.4);
+      border: 1px solid rgba(232,206,146,0.2); border-radius: 16px;
+      padding: 20px 24px; color: #FFFFFF; font-size: 16px;
+      line-height: 1.6; resize: vertical; font-family: sans-serif;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    textarea:focus { outline: none; border-color: rgba(232,206,146,0.6); box-shadow: 0 0 0 3px rgba(232,206,146,0.08); }
+    textarea::placeholder { color: rgba(255,255,255,0.3); }
+
+    .btn-row { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; }
+
+    /* ── SPINNER ── */
+    #screen-loading { text-align: center; padding: 48px 0; }
+    .spinner { width: 56px; height: 56px; border: 3px solid rgba(232,206,146,0.2); border-top: 3px solid #E8CE92; border-radius: 50%; animation: spin 0.9s linear infinite; margin: 0 auto 24px; }
+    .spinner-text { font-family: 'Cormorant Garamond', serif; color: #E8CE92; font-size: 18px; letter-spacing: 0.04em; }
+
+    /* ── RESULTS ── */
+    .results-header { text-align: center; margin-bottom: 48px; }
+    .results-label { color: #E8CE92; font-size: 12px; letter-spacing: 0.2em; margin-bottom: 12px; display: block; }
+    .results-h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 5vw, 48px); font-weight: 500; line-height: 1.2; }
+    .results-hint { color: rgba(255,255,255,0.3); font-size: 14px; margin-top: 12px; }
+
+    .ideas-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 48px; }
+
+    .idea-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(232,206,146,0.25);
+      border-radius: 16px; padding: 28px 32px;
+      cursor: pointer; transition: all 0.3s ease;
+      animation: fadeUp 0.5s ease both;
+    }
+    .idea-card:hover { background: rgba(232,206,146,0.04); }
+    .idea-card.open { background: rgba(232,206,146,0.08); }
+
+    .idea-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+    .idea-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .idea-badge {
+      background: linear-gradient(135deg, #E8CE92, #c9a95a);
+      color: #000000; font-family: 'Cormorant Garamond', serif;
+      font-weight: 700; font-size: 12px; padding: 3px 10px;
+      border-radius: 20px; letter-spacing: 0.1em;
+    }
+    .idea-potential { color: #E8CE92; font-size: 12px; letter-spacing: 0.08em; }
+    .idea-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: #FFFFFF; font-weight: 600; line-height: 1.3; }
+    .idea-tagline { color: #E8CE92; font-size: 14px; margin-top: 6px; line-height: 1.6; }
+    .idea-toggle { color: #E8CE92; font-size: 20px; flex-shrink: 0; transition: transform 0.3s; }
+    .idea-card.open .idea-toggle { transform: rotate(45deg); }
+
+    .idea-details { margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(232,206,146,0.15); display: none; }
+    .idea-card.open .idea-details { display: block; }
+    .idea-description { color: rgba(255,255,255,0.75); font-size: 15px; line-height: 1.7; margin-bottom: 20px; }
+    .idea-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .idea-box { background: rgba(232,206,146,0.06); border-radius: 12px; padding: 16px; }
+    .idea-box-label { color: #E8CE92; font-size: 11px; letter-spacing: 0.12em; margin-bottom: 8px; }
+    .idea-box-text { color: #FFFFFF; font-size: 14px; line-height: 1.5; }
+    .idea-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .idea-tag { background: transparent; border: 1px solid rgba(232,206,146,0.3); color: #E8CE92; font-size: 12px; padding: 4px 12px; border-radius: 20px; }
+
+    .results-footer { text-align: center; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .results-footer p { color: rgba(255,255,255,0.3); font-size: 14px; margin-bottom: 20px; }
+
+    .error-msg { color: #E87070; text-align: center; margin-bottom: 24px; font-size: 14px; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(232,206,146,0.3); border-radius: 4px; }
+
+    @media (max-width: 480px) {
+      .idea-grid { grid-template-columns: 1fr; }
+      .icons-row { gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- INTRO -->
+  <div id="screen-intro" class="screen active">
+    <span class="intro-label">DEIN BUSINESS-KOMPASS</span>
+    <h1 class="intro-h1">
+      Entdecke deine<br /><em class="gold">Business-Idee</em>
+    </h1>
+    <p class="intro-sub">
+      In nur 3 Minuten analysieren wir, welches Business wirklich zu dir passt – und sich auf dem Markt leicht monetarisieren lässt.
+    </p>
+    <div class="icons-row">
+      <div class="icon-item"><div class="icon-circle">✦</div><p class="icon-label">Hobbys & Leidenschaften</p></div>
+      <div class="icon-item"><div class="icon-circle">◈</div><p class="icon-label">Dein natürlicher Rat</p></div>
+      <div class="icon-item"><div class="icon-circle">❋</div><p class="icon-label">Expertise & Erfahrung</p></div>
+    </div>
+    <button class="btn-primary" onclick="goToStep(1)">Jetzt starten →</button>
+  </div>
+
+  <!-- QUESTION SCREEN -->
+  <div id="screen-question" class="screen">
+    <div class="progress">
+      <div class="progress-bar" id="bar-0"></div>
+      <div class="progress-bar" id="bar-1"></div>
+      <div class="progress-bar" id="bar-2"></div>
+    </div>
+    <div class="step-header">
+      <span class="step-number" id="step-number"></span>
+      <div>
+        <p class="step-subtitle" id="step-subtitle"></p>
+        <h2 class="step-title" id="step-title"></h2>
+      </div>
+    </div>
+    <p class="step-question" id="step-question"></p>
+    <textarea id="step-textarea" rows="5" oninput="checkCanProceed()"></textarea>
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="goBack()">← Zurück</button>
+      <button class="btn-primary" id="btn-next" onclick="goNext()" disabled>Weiter →</button>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="screen-loading" class="screen">
+    <div class="spinner"></div>
+    <p class="spinner-text">Deine Business-Ideen werden analysiert …</p>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="screen-results" class="screen">
+    <div class="results-header">
+      <span class="results-label">DEINE ERGEBNISSE</span>
+      <h2 class="results-h2">
+        <span id="idea-count"></span> Business-Ideen<br /><em class="gold">die zu dir passen</em>
+      </h2>
+      <p class="results-hint">Klicke auf eine Idee für Details & erste Schritte</p>
+    </div>
+    <div class="ideas-list" id="ideas-list"></div>
+    <div id="error-msg" class="error-msg" style="display:none;"></div>
+    <div class="results-footer">
+      <p>Keine passende Idee dabei?</p>
+      <button class="btn-ghost" onclick="resetApp()">↺ Neu starten</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── CONFIG ──────────────────────────────────────────────────────────────────
+  // WICHTIG: Ersetze diese URL mit deiner eigenen Vercel-URL nach dem Deployment!
+  const API_URL = "https://DEINE-VERCEL-URL.vercel.app/api/generate";
+  // ────────────────────────────────────────────────────────────────────────────
+
+  const STEPS = [
+    {
+      number: "01", subtitle: "Was liebst du wirklich?",
+      title: "Hobbys & Leidenschaften",
+      question: "Welche Hobbys, Interessen oder Leidenschaften beschäftigen dich – auch in deiner Freizeit? Was könntest du stundenlang machen, ohne auf die Uhr zu schauen?",
+      placeholder: "z.B. Fotografieren, Kochen, Sport, Reisen, Musik, Gartenarbeit, Mode, Technologie ..."
+    },
+    {
+      number: "02", subtitle: "Worin vertrauen dir andere?",
+      title: "Dein natürlicher Rat",
+      question: "Wozu fragen dich Freunde, Familie oder Kollegen spontan um Rat? Bei welchen Themen bist du die erste Anlaufstelle?",
+      placeholder: "z.B. Ernährung, Beziehungen, IT-Probleme, Finanzen, Interior Design, Organisation ..."
+    },
+    {
+      number: "03", subtitle: "Was hast du gelernt & erlebt?",
+      title: "Expertise & Erfahrung",
+      question: "Was hast du durch Ausbildung, Studium, Beruf oder Lebenserfahrung gelernt? Welche Fähigkeiten oder Kenntnisse hast du dir aufgebaut?",
+      placeholder: "z.B. Marketing-Studium, 10 Jahre als Krankenschwester, Projektmanagement, Sprachkenntnisse ..."
+    }
+  ];
+
+  let currentStep = 0;
+  const answers = ["", "", ""];
+
+  function showScreen(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+  }
+
+  function goToStep(step) {
+    currentStep = step;
+    if (step === 0) { showScreen("screen-intro"); return; }
+    const s = STEPS[step - 1];
+    document.getElementById("step-number").textContent = s.number;
+    document.getElementById("step-subtitle").textContent = s.subtitle.toUpperCase();
+    document.getElementById("step-title").textContent = s.title;
+    document.getElementById("step-question").textContent = s.question;
+    const ta = document.getElementById("step-textarea");
+    ta.placeholder = s.placeholder;
+    ta.value = answers[step - 1];
+    // Progress bars
+    for (let i = 0; i < 3; i++) {
+      document.getElementById("bar-" + i).classList.toggle("done", i < step);
+    }
+    // Next button label
+    document.getElementById("btn-next").textContent = step === 3 ? "Business-Ideen generieren ✦" : "Weiter →";
+    checkCanProceed();
+    showScreen("screen-question");
+    setTimeout(() => ta.focus(), 100);
+  }
+
+  function checkCanProceed() {
+    const val = document.getElementById("step-textarea").value.trim();
+    document.getElementById("btn-next").disabled = val.length <= 5;
+  }
+
+  function goBack() {
+    answers[currentStep - 1] = document.getElementById("step-textarea").value;
+    if (currentStep === 1) goToStep(0);
+    else goToStep(currentStep - 1);
+  }
+
+  function goNext() {
+    answers[currentStep - 1] = document.getElementById("step-textarea").value;
+    if (currentStep < 3) { goToStep(currentStep + 1); }
+    else { generateIdeas(); }
+  }
+
+  async function generateIdeas() {
+    showScreen("screen-loading");
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hobbies: answers[0], advice: answers[1], expertise: answers[2] })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unbekannter Fehler");
+      renderIdeas(data.ideas);
+    } catch (e) {
+      renderIdeas([], "Fehler: " + e.message);
+    }
+  }
+
+  function renderIdeas(ideas, error) {
+    document.getElementById("idea-count").textContent = ideas.length;
+    const list = document.getElementById("ideas-list");
+    list.innerHTML = "";
+    ideas.forEach((idea, i) => {
+      const card = document.createElement("div");
+      card.className = "idea-card";
+      card.style.animationDelay = (i * 0.12) + "s";
+      card.innerHTML = `
+        <div class="idea-top">
+          <div style="flex:1">
+            <div class="idea-meta">
+              <span class="idea-badge">${idea.category}</span>
+              <span class="idea-potential">${idea.monetization_potential}</span>
+            </div>
+            <div class="idea-title">${idea.title}</div>
+            <div class="idea-tagline">${idea.tagline}</div>
+          </div>
+          <span class="idea-toggle">+</span>
+        </div>
+        <div class="idea-details">
+          <p class="idea-description">${idea.description}</p>
+          <div class="idea-grid">
+            <div class="idea-box">
+              <p class="idea-box-label">MONETARISIERUNG</p>
+              <p class="idea-box-text">${idea.how_to_monetize}</p>
+            </div>
+            <div class="idea-box">
+              <p class="idea-box-label">ERSTE SCHRITTE</p>
+              <p class="idea-box-text">${idea.first_steps}</p>
+            </div>
+          </div>
+          <div class="idea-tags">
+            ${(idea.target_audience || []).map(t => `<span class="idea-tag">${t}</span>`).join("")}
+          </div>
+        </div>`;
+      card.addEventListener("click", () => card.classList.toggle("open"));
+      list.appendChild(card);
+    });
+    const errEl = document.getElementById("error-msg");
+    if (error) { errEl.textContent = error; errEl.style.display = "block"; }
+    else { errEl.style.display = "none"; }
+    showScreen("screen-results");
+  }
+
+  function resetApp() {
+    answers[0] = answers[1] = answers[2] = "";
+    goToStep(0);
+  }
+</script>
+</body>
+</html>
